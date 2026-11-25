@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cliente de envíos (prueba CORS)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; }
+    input, button { font: inherit; padding: .4rem .6rem; }
+    pre { background: #f4f4f4; padding: 1rem; overflow: auto; border-radius: 6px; }
+    .ok { color: #1a7f37; } .err { color: #c62828; }
+  </style>
+</head>
+<body>
+  <h1>Cliente web de envíos</h1>
+  <p>Origen de esta página: <strong id="origen"></strong></p>
+  <p>
+    API: <input id="api" value="http://localhost:3000/api/envios" size="36">
+    Header X-Red-Equipo: <input id="equipo" value="CIAF-15" size="10">
+  </p>
+  <button id="btnGet">GET /api/envios</button>
+  <button id="btnPost">POST /api/envios</button>
+  <p id="estado"></p>
+  <pre id="salida">(sin respuesta aún)</pre>
+
+  <script>
+    document.getElementById('origen').textContent = location.origin;
+    const $ = (id) => document.getElementById(id);
+
+    async function llamar(metodo) {
+      $('estado').textContent = 'Enviando...';
+      $('estado').className = '';
+      try {
+        const opciones = {
+          method: metodo,
+          headers: { 'X-Red-Equipo': $('equipo').value },
+        };
+        if (metodo === 'POST') {
+          opciones.headers['Content-Type'] = 'application/json';
+          opciones.body = JSON.stringify({
+            remitente: 'Cliente Web', destinatario: 'Prueba CORS',
+            ciudadOrigen: 'Pereira', ciudadDestino: 'Medellín', pesoKg: 1.5,
+          });
+        }
+        const r = await fetch($('api').value, opciones);
+        const procesado = r.headers.get('X-Servidor-Procesado'); // visible gracias a exposedHeaders
+        $('estado').textContent = `HTTP ${r.status} — X-Servidor-Procesado: ${procesado ?? '(no recibido)'}`;
+        $('estado').className = r.ok ? 'ok' : 'err';
+        $('salida').textContent = JSON.stringify(await r.json(), null, 2);
+      } catch (e) {
+        // Cuando CORS bloquea, el navegador NO deja ver la respuesta: solo un TypeError genérico.
+        $('estado').textContent = 'Bloqueado por el navegador (revise la consola: política CORS).';
+        $('estado').className = 'err';
+        $('salida').textContent = String(e);
+      }
+    }
+    $('btnGet').onclick = () => llamar('GET');
+    $('btnPost').onclick = () => llamar('POST');
+  </script>
+</body>
+</html>
