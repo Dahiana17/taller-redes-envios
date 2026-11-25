@@ -1,0 +1,20 @@
+{
+  "name": "taller-redes-envios",
+  "version": "1.0.0",
+  "description": "Servicio web de consulta y registro de envíos con Express, CORS y encabezados HTTP personalizados (Taller final - Programación de redes, CIAF)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "cliente": "node cliente/servir-cliente.js"
+  },
+  "keywords": ["express", "cors", "http", "headers", "postman"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}
